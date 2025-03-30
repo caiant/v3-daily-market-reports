@@ -19,13 +19,13 @@ tickers = {
     "SSE Composite": "000001.SS",
     "FTSE 100": "^FTSE",
     "DAX Index": "^GDAXI",
-    "S&P 500": "^GSPC",  # Changed from Futures to regular index
-    "USD/JPY": "JPY=X",
-    "EUR/USD": "EURUSD=X",
-    "GBP/USD": "GBPUSD=X",
-    "Crude Oil": "CL=F",  # Correct WTI symbol
-    "UK 10Y Yield": "^TNX",  # Temporary proxy
-    "Germany 10Y Yield": "^TNX"  # Temporary proxy
+    "S&P 500 Futures": "^GSPC",
+    "USD/JPY (Yen)": "JPY=X",
+    "EUR/USD (Euro)": "EURUSD=X",
+    "GBP/USD (Pound)": "GBPUSD=X",
+    "Crude Oil (WTI)": "WTI",
+    "UK 10Y Bond": "GB10Y.GB",
+    "German 10Y Bond": "DE10Y.DE"
 }
 
 def get_market_data():
