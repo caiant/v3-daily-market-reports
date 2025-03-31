@@ -20,8 +20,11 @@ tickers = {
     "FTSE 100": "^FTSE",
     "DAX Index": "^GDAXI",
     "S&P 500": "^GSPC",
+    "S&P Futures": "ES=F",
     "Dow Jones": "^DJI",
+    "Dow Futures": "YM=F",
     "Nasdaq Composite": "^IXIC",
+    "Nasdaq Futures": "NQ=F",
     "USD/JPY (Yen)": "JPY=X",
     "EUR/USD (Euro)": "EURUSD=X",
     "GBP/USD (Pound)": "GBPUSD=X",
@@ -47,7 +50,7 @@ def get_market_data():
                 # Format numbers based on asset type
                 if "Yield" in name:
                     data.append([name, f"{last_close:.2f}%", f"{change:.2f}", f"{percent_change:.2f}%"])
-                elif any(x in name for x in ["Nikkei", "Hang Seng", "FTSE", "DAX", "S&P", "Dow", "Nasdaq"]):
+                elif any(x in name for x in ["Nikkei", "Hang Seng", "FTSE", "DAX", "S&P", "ES=F", "Dow","YM=F","Nasdaq","NQ=F"]):
                     data.append([name, f"{last_close:,.2f}", f"{change:,.2f}", f"{percent_change:.2f}%"])
                 elif any(x in name for x in ["USD/JPY", "EUR/USD", "GBP/USD"]):
                     data.append([name, f"{last_close:.4f}", f"{change:.4f}", f"{percent_change:.2f}%"])
