@@ -26,6 +26,9 @@ tickers = {
     "EUR/USD (Euro)": "EURUSD=X",
     "GBP/USD (Pound)": "GBPUSD=X",
     "Crude Oil (WTI)": "WTI",
+    "S&P Futures": "ES=F",
+    "Dow Jones Futures": "YM=F", 
+    "Nasdaq Futures": "NQ=F"
 }
 
 def get_market_data():
