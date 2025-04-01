@@ -28,7 +28,8 @@ tickers = {
     "Crude Oil (WTI)": "WTI",
     "S&P Futures": "ES=F",
     "Dow Jones Futures": "YM=F", 
-    "Nasdaq Futures": "NQ=F"
+    "Nasdaq Futures": "NQ=F", 
+    "Gold Futures": "GC=F"
 }
 
 def get_market_data():
@@ -48,7 +49,7 @@ def get_market_data():
                 # Format numbers based on asset type
                 if "Yield" in name:
                     data.append([name, f"{last_close:.2f}%", f"{change:.2f}", f"{percent_change:.2f}%"])
-                elif any(x in name for x in ["Nikkei", "Hang Seng", "FTSE", "DAX", "S&P", "Dow","Nasdaq"]):
+                elif any(x in name for x in ["Nikkei", "Hang Seng", "FTSE", "DAX", "S&P", "Dow","Nasdaq", "Gold"]):
                     data.append([name, f"{last_close:,.2f}", f"{change:,.2f}", f"{percent_change:.2f}%"])
                 elif any(x in name for x in ["USD/JPY", "EUR/USD", "GBP/USD"]):
                     data.append([name, f"{last_close:.4f}", f"{change:.4f}", f"{percent_change:.2f}%"])
