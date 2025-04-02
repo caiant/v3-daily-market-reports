@@ -10,7 +10,8 @@ import pytz
 # Email credentials (use environment variables in production)
 EMAIL_ADDRESS = "cailin.antonio@glccap.com"
 EMAIL_PASSWORD = "ohdu zsxf lahi mpss"
-TO_EMAIL = "caiantonio2427@gmail.com"
+TO_EMAIL = ["eat4420@gmail.com, "lovelycailin@gmail.com"]
+BCC_EMAILS = "caiantonio2427@gmail.com"
 
 # Updated and verified ticker symbols
 tickers = {
@@ -179,9 +180,10 @@ def send_email():
         # Initialize yagmail
         yag = yagmail.SMTP(EMAIL_ADDRESS, EMAIL_PASSWORD)
         yag.send(
-            to=TO_EMAIL,
+            to=TO_EMAILS,
             subject=subject,
-            contents=report_html
+            contents=report_html, 
+            bcc=BCC_emails
         )
         print("✅ Email sent successfully!")
     except Exception as e:
