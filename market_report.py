@@ -180,10 +180,10 @@ def send_email():
         # Initialize yagmail
         yag = yagmail.SMTP(EMAIL_ADDRESS, EMAIL_PASSWORD)
         yag.send(
-            to=TO_EMAILS,
+            to= TO_EMAILS ,
             subject=subject,
             contents=report_html, 
-            bcc=BCC_emails
+            bcc= BCC_EMAILS
         )
         print("✅ Email sent successfully!")
     except Exception as e:
