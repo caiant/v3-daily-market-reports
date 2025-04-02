@@ -10,7 +10,7 @@ import pytz
 # Email credentials (use environment variables in production)
 EMAIL_ADDRESS = "cailin.antonio@glccap.com"
 EMAIL_PASSWORD = "ohdu zsxf lahi mpss"
-TO_EMAILS = ["lovelycailin@gmail.com"]
+TO_EMAILS = ["simon.sominsky@glccap.com"]
 BCC_EMAILS = "caiantonio2427@gmail.com"
 
 # Updated and verified ticker symbols
