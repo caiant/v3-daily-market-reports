@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
-"""Enhanced Market Report with Professional Formatting"""
+"""Enhanced Market Report with BOE Rate and Professional Formatting"""
 
 import yfinance as yf
 import pandas as pd
-import yagmail
+import yagmail 
 from datetime import datetime
 import pytz
+import time
+import os
+import requests
+from bs4 import BeautifulSoup
+import re
+
 
 # Email credentials (use environment variables in production)
 EMAIL_ADDRESS = "cailin.antonio@glccap.com"
@@ -33,13 +39,39 @@ tickers = {
     "Gold Futures": "GC=F"
 }
 
-def get_market_data():
+def get_trading_economics_yields():
+    yields = []
+    urls = {
+        "UK 10Y Gilt Yield": "https://tradingeconomics.com/united-kingdom/government-bond-yield",
+        "Germany 10Y Bond Yield": "https://tradingeconomics.com/germany/government-bond-yield"
+    }
+
+    headers = {"User-Agent": "Mozilla/5.0"}
+
+    for name, url in urls.items():
+        try:
+            response = requests.get(url, headers=headers)
+            soup = BeautifulSoup(response.content, "html.parser")
+            text = soup.get_text(separator=" ", strip=True)
+            match = re.search(rf"{name.split()[0]} 10Y\s+([\d.]+)", text)
+            if match:
+                yields[name] = f"{match.group(1)}%"
+            else:
+                yields[name] = "Not found"
+        except Exception as e:
+            yields[name] = f"Error: {str(e)}"
+    return yields
+    
+    
+def get_market_data(): 
     """Fetch market data with enhanced error handling"""
     data = []
+    
+    # Get other market data
     for name, symbol in tickers.items():
         try:
             asset = yf.Ticker(symbol)
-            info = asset.history(period="2d")  # Get 2 days for proper change calculation
+            info = asset.history(period="2d")
             
             if not info.empty and len(info) >= 2:
                 last_close = info["Close"].iloc[-1]
@@ -47,10 +79,8 @@ def get_market_data():
                 change = last_close - prev_close
                 percent_change = (change / prev_close) * 100
                 
-                # Format numbers based on asset type
-                if "Yield" in name:
-                    data.append([name, f"{last_close:.2f}%", f"{change:.2f}", f"{percent_change:.2f}%"])
-                elif any(x in name for x in ["Nikkei", "Hang Seng", "FTSE", "DAX", "S&P", "Dow","Nasdaq", "Gold"]):
+                # Format numbers based on asset type      
+                if any(x in name for x in ["Nikkei", "Hang Seng", "FTSE", "DAX", "S&P", "Dow","Nasdaq", "Gold"]):
                     data.append([name, f"{last_close:,.2f}", f"{change:,.2f}", f"{percent_change:.2f}%"])
                 elif any(x in name for x in ["USD/JPY", "EUR/USD", "GBP/USD"]):
                     data.append([name, f"{last_close:.4f}", f"{change:.4f}", f"{percent_change:.2f}%"])
@@ -58,15 +88,24 @@ def get_market_data():
                     data.append([name, f"{last_close:.2f}", f"{change:.2f}", f"{percent_change:.2f}%"])
             else:
                 data.append([name, "No Data", "N/A", "N/A"])
+
         except Exception as e:
             print(f"Error fetching {name}: {str(e)}")
             data.append([name, "Error", "Error", "Error"])
+
+    # Append UK and German yields
+    bond_yields = get_trading_economics_yields()
+    for name, value in bond_yields.items():
+            data.append([name, value, "N/A", "N/A"])
+
     
     return pd.DataFrame(data, columns=["Asset", "Last Price", "Change", "Change %"])
+
 
 def format_html_report(df):
     """Generate professional HTML report with proper styling"""
     current_time = datetime.now(pytz.timezone('US/Eastern')).strftime('%Y-%m-%d %H:%M %Z')
+    
     
     html = f"""
     <html>
@@ -84,6 +123,7 @@ def format_html_report(df):
                 color: #2c3e50;
                 border-bottom: 2px solid #3498db;
                 padding-bottom: 10px;
+                margin-bottom: 10px;
             }}
             table {{
                 width: 100%;
@@ -123,6 +163,18 @@ def format_html_report(df):
                 text-align: center;
                 margin-top: 20px;
             }}
+            .boe-highlight {{
+                background-color: #e3f2fd;
+                font-weight: bold;
+                border-left: 4px solid #1976d2;
+            }}
+            .info-note {{
+                background-color: #e8f5e9;
+                padding: 8px;
+                border-radius: 4px;
+                margin-bottom: 15px;
+                font-size: 14px;
+            }}
         </style>
     </head>
     <body>
@@ -140,18 +192,23 @@ def format_html_report(df):
     """
     
     for _, row in df.iterrows():
-        # Add color coding based on change
+        # Special formatting for BOE rate
+        row_class = "boe-highlight" if "BOE Bank Rate" in row['Asset'] else ""
+        
+        # Color coding for changes (except BOE rate)
         change_class = ""
-        try:
-            if float(row['Change'].replace(',','')) > 0:
-                change_class = "positive"
-            elif float(row['Change'].replace(',','')) < 0:
-                change_class = "negative"
-        except:
-            pass
+        if "BOE Bank Rate" not in row['Asset']:
+            try:
+                change_value = float(row['Change'].replace(',','').replace('%',''))
+                if change_value > 0:
+                    change_class = "positive"
+                elif change_value < 0:
+                    change_class = "negative"
+            except:
+                pass
         
         html += f"""
-                <tr>
+                <tr class="{row_class}">
                     <td>{row['Asset']}</td>
                     <td>{row['Last Price']}</td>
                     <td class="{change_class}">{row['Change']}</td>
@@ -163,7 +220,7 @@ def format_html_report(df):
             </tbody>
         </table>
         <div class="footer">
-            <p>Data source: Yahoo Finance | Report generated at {current_time}</p>
+            <p>Data sources: Yahoo Finance & Bank of England | Report generated at {current_time}</p>
         </div>
     </body>
     </html>
@@ -173,17 +230,20 @@ def format_html_report(df):
 def send_email():
     """Send formatted market report via email"""
     try:
-        df = get_market_data()
-        report_html = format_html_report(df)
+        # Get market data including BOE rate
+        market_data = get_market_data()
+        
+        # Format report - you'll need to define decision_date or pass None
+        report_html = format_html_report(market_data)  # or get this from somewhere
         subject = f"Daily Market Report - {datetime.now().strftime('%Y-%m-%d')}"
         
         # Initialize yagmail
         yag = yagmail.SMTP(EMAIL_ADDRESS, EMAIL_PASSWORD)
         yag.send(
-            to= TO_EMAILS ,
+            to=TO_EMAILS,
             subject=subject,
             contents=report_html, 
-            bcc= BCC_EMAILS
+            bcc=BCC_EMAILS
         )
         print("✅ Email sent successfully!")
     except Exception as e:
