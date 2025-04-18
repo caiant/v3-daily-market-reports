@@ -18,7 +18,7 @@ import numpy_financial as npf
 # Email credentials (use environment variables in production)
 EMAIL_ADDRESS = "cailin.antonio@glccap.com"
 EMAIL_PASSWORD = "ohdu zsxf lahi mpss"
-TO_EMAILS = "lovelycailin@gmail.com"
+TO_EMAILS = ["simon.sominsky@glccap.com", "frank.garcia@glccap.com"]
 BCC_EMAILS = "caiantonio2427@gmail.com"
 
 tickers = {
