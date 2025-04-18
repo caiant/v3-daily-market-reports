@@ -11,6 +11,8 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import re
+import numpy as np 
+import numpy_financial as npf
 
 
 # Email credentials (use environment variables in production)
